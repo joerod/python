@@ -1,4 +1,6 @@
 import os
-list = os.listdir("/Users/joerod/Desktop/")
+path = "/Users/joerod/Desktop/"
+list = os.listdir(path)
+os.chdir(path)
 for i in list:
-   os.rename('/Users/joerod/Desktop/' + i, '/Users/joerod/Desktop/' + i.title())
+   os.rename(i, i.title())
