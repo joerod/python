@@ -4,19 +4,21 @@
 import wmi
 import paramiko
 
-hostname = ['linuxbox','windowsbox','linuxbox2']
+with open('C:\\Users\\jorodriguez\\Desktop\\hosts.txt', 'r') as hostname:
 
-for computer in hostname:
+ for computer in hostname:
     try:
+        #gets OS version on Linux boxes
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(computer, username='linuxaccout', password='foo')
+        client.connect(computer.strip(), username='joroadmin', password='foo')
         stdin, stdout, stderr = client.exec_command('cat /etc/redhat-release')
         OS = stdout.readlines()
-        print computer, "-", ''.join([item.rstrip('\n') for item in OS])
+        print computer.strip(), "-", ''.join([item.rstrip('\n') for item in OS])
 
 
     except:
-           c = wmi.WMI(computer)
+           #gets OS version on Windows boxes
+           c = wmi.WMI(computer.strip())
            for win in c.Win32_OperatingSystem():
-             print computer, '-', win.Caption
+             print computer.strip(), '-', win.Caption
