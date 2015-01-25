@@ -1,10 +1,7 @@
-#This script gets data from the serial device (Adruino) then updates a file/sends and email/posts tweet of the current temp
-#Where the website known as joerod.com lives.  Updates every hour
-
 __author__ = 'joerod'
-import serial,time,smtplib,tweepy
+import serial,time,smtplib,tweepy,email.utils
 from time import strftime
-
+from email.mime.text import MIMEText
 
 ser = serial.Serial('/dev/tty.usbmodem5d11', 9600)
 while True:
@@ -12,25 +9,25 @@ while True:
     with open('/Volumes/JoeRod/joerod/Desktop/temp.txt', 'w') as f:
       f.write(ser.readline())
 
-    #sends email
-    fromaddr = 'acropolis21284e@gmail.com'
-    toaddrs  = 'joerod@gmail.com'
     subject = 'The temperature is currently %s' %(ser.readline())
+    #sends email
     text =  'Temperature was taken at %s' % (strftime("%m/%d/%Y %H:%M"))
-    msg = 'From: Temperature@gmail.com\nSubject: %s\n\n%s' % (subject,text)
+    msg = MIMEText(text)
+    msg['To'] = email.utils.formataddr(('Joe Rodriguez', 'joerod@gmail.com'))
+    msg['From'] = email.utils.formataddr(('JoeRod Temperature', 'acropolis21284e@gmail.com'))
+    msg['Subject'] = subject
 
 
     # Credentials (if needed)
     username = 'acropolis21284e@gmail.com'
-    password = 'Password1'
+    password = ''
 
-     # The actual mail send
+   # The actual mail send
     server = smtplib.SMTP('smtp.gmail.com:587')
     server.starttls()
     server.login(username,password)
-    server.sendmail(fromaddr, toaddrs, msg)
+    server.sendmail('acropolis21284e@gmail.com', ['joerod@gmail.com'], msg.as_string())
     server.quit()
-
 
     #sends tweet with temperature
     #enter the corresponding information from your Twitter application:
