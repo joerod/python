@@ -44,3 +44,4 @@ else:
     print 'All is good!'
     
 #check timestamp on file if IP has change and timestamp greater then 2 hours change file to current IP    
+#datetime.datetime.now().strftime('%m-%d-%Y %H:%M:%s')
