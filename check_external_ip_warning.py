@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import urllib
-import re
-import time,smtplib,email.utils
+import urllib,re, os.path,smtplib,email.utils
 from email.mime.text import MIMEText
 
 #Grabs external ip from site
@@ -43,5 +41,7 @@ if get_external_ip() != read_ip:
 else:
     print 'All is good!'
     
-#check timestamp on file if IP has change and timestamp greater then 2 hours change file to current IP    
+#check timestamp on file if IP has change and timestamp greater then 2 hours change file to current IP  
+#file = '/Users/joerod/Desktop/ip.txt'
+#print "last modified: %s" % time.ctime(os.path.getmtime(file))
 #datetime.datetime.now().strftime('%m-%d-%Y %H:%M:%s')
