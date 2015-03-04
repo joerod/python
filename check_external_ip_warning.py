@@ -2,11 +2,12 @@ __author__ = 'joerod'
 
 #!/usr/bin/env python
 
-import urllib,re,smtplib,email.utils,os.path
+import urllib,re,smtplib,email.utils,os.path,datetime
 from email.mime.text import MIMEText
 
 #Grabs external ip from site
 file_path = '/Users/joerod/Desktop/ip.txt'
+d = datetime.datetime.now()
 
 def get_external_ip():
     site = urllib.urlopen("http://checkip.dyndns.org/").read()
@@ -37,7 +38,7 @@ if __name__ == '__main__':
         server.sendmail('acropolis21284e@gmail.com', ['joerod@gmail.com'], msg.as_string())
         server.quit()
     else:
-        print "All is good!"
+        print "All is good! %s" %d.strftime("%m-%d-%Y %H:%M:%S")
 
     #if current time is +1 hours from last write time of file and if IP does not match file, write to file
 
