@@ -1,11 +1,10 @@
 __author__ = 'joerod'
-"""I created this script to prepare files to be sent to EMC data domain
-"""
 
-import datetime,time,os,subprocess,zipfile
+import datetime,time,os,subprocess,zipfile,shutil
 
-path = '/tmp/files'
 pattern = '%Y-%d-%m'
+source = '/tmp/files'
+destination = '/tmp/files/move'
 
 #finds delta time between today and 7 years from now
 now_plus = ((datetime.datetime.now()) + datetime.timedelta(7*365)).strftime(pattern)
@@ -14,7 +13,7 @@ epoch = int(time.mktime(time.strptime(now_plus,pattern)))
 
 #gives full path of files in folder
 #loops through files and sets A time
-for file in ([os.path.join(path,fn)for fn in next(os.walk(path))[2]]):
+for file in ([os.path.join(source,fn)for fn in next(os.walk(source))[2]]):
 
     openfiles = subprocess.Popen(['/usr/sbin/lsof'],
                              stdout=subprocess.PIPE)
@@ -30,12 +29,14 @@ for file in ([os.path.join(path,fn)for fn in next(os.walk(path))[2]]):
         print (output)
 
     else:
-        print ("Doing stuff to %s" %file)
+        print ("Working on %s" %file)
         #sets A time, changes file name to date, zips file, and sends to DD
-        os.chdir(path)
-        zipname = file + datetime.datetime.now().strftime('%m-%d-%Y') +'.zip'
+        #zip
+        zipname = file + '_' +datetime.datetime.now().strftime('%m-%d-%Y') +'.zip'
         zip = zipfile.ZipFile(zipname, 'w')
         zip.write(file)
         zip.close()
+        #sets A time
         os.utime(zipname,(time.time(),epoch))
-
+        #sends to folder
+        shutil.move(zipname, destination )
