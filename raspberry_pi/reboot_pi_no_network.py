@@ -8,10 +8,11 @@ def check_ping(host):
     # and then check the response...
     if response == 0:
         with open(logfile,"a") as myfile:
-            myfile.write("{0} - Network Active".format(str(datetime.datetime.now())))
+            myfile.write("{0} - Network Active\n ".format(str(datetime.datetime.now())))
     else:
         with open(logfile,"a") as myfile:
-            myfile.write("{0} - Network Down".format(str(datetime.datetime.now())))
+            myfile.write("{0} - Network Down\n".format(str(datetime.datetime.now())))
         os.system("sudo shutdown -r now")
 
 check_ping("192.168.1.1")
+
