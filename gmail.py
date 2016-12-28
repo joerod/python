@@ -77,7 +77,7 @@ def mark_as_read(service,user_id):
     except:
         print("No SPAM messages found")
 
-mark_as_read(service,'me')
+#mark_as_read(service,'me')
 #Send an email message.
 def SendMessage(service, user_id, message):
   try:
@@ -138,3 +138,13 @@ def CreateMessageWithAttachment(sender, to, subject, message_text, file_dir, fil
   return {'raw': base64.urlsafe_b64encode(message.as_string())}
 
 #SendMessage(service,'me',CreateMessage('bill.gates@gmail.com','joerod@gmail.com','You are the man','test'))
+
+#Gets profile info
+def get_profile(service,user_id):
+    profile = service.users().getProfile(userId=user_id).execute()
+    print('emailAddress : %s' % profile['emailAddress'])
+    print('historyId : %s' % profile['historyId'])
+    print('messagesTotal : %s' % profile['messagesTotal'])
+    print('threadsTotal : %s' % profile['threadsTotal'])
+
+#get_profile(service,'me')
