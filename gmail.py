@@ -4,7 +4,7 @@ import os
 import base64
 import mimetypes
 
-from apiclient import discovery
+from apiclient import discovery,errors
 from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
@@ -142,9 +142,19 @@ def CreateMessageWithAttachment(sender, to, subject, message_text, file_dir, fil
 #Gets profile info
 def get_profile(service,user_id):
     profile = service.users().getProfile(userId=user_id).execute()
-    print('emailAddress : %s' % profile['emailAddress'])
-    print('historyId : %s' % profile['historyId'])
-    print('messagesTotal : %s' % profile['messagesTotal'])
-    print('threadsTotal : %s' % profile['threadsTotal'])
+    for k in profile.keys():
+        print(k, ':', profile[k])
 
-#get_profile(service,'me')
+get_profile(service,'me')
+
+def ListLabels(service,user_id):
+    try:
+        response = service.users().labels().list(userId=user_id).execute()
+        labels = response['labels']
+        for label in labels:
+             print('Label id: %s - Label name: %s' % (label['id'], label['name']))
+        return labels
+    except errors.HttpError, error:
+        print ('An error occurred: %s' % error)
+
+#ListLabels(service,'me')
