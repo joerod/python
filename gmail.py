@@ -1,11 +1,19 @@
 from __future__ import print_function
 import httplib2
 import os
+import base64
+import mimetypes
 
 from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
+from email.mime.audio import MIMEAudio
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from apiclient import errors
 
 #configure scopes and get token
 SCOPES = 'https://mail.google.com/'
@@ -48,25 +56,85 @@ service = discovery.build('gmail', 'v1', http=http)
 
 #finds all messages labeled as SPAM
 #need to add pagination
-def delete_spam():
+def delete_spam(service,user_id):
     try:
-        SPAM  = service.users().messages().list(userId='me',labelIds='SPAM').execute()['messages']
+        SPAM  = service.users().messages().list(userId=user_id,labelIds='SPAM').execute()['messages']
         for delete in SPAM:
-            service.users().messages().delete(userId='me', id=delete['id']).execute()
+            service.users().messages().delete(userId=user_id, id=delete['id']).execute()
         print("{:d} SPAM emails have been deleted".format(len(SPAM)))
     except:
         print("No Unread messages found")
 
-delete_spam()
-
+#delete_spam(service,'me')
 #finds all messages labeled as Unread
 #need to add pagination
-def mark_as_read():
+def mark_as_read(service,user_id):
     try:
-        Unread = service.users().messages().list(userId='me',labelIds='UNREAD').execute()['messages']
+        Unread = service.users().messages().list(userId=user_id,labelIds='UNREAD').execute()['messages']
         for markread in Unread:
-                service.users().messages().modify(userId='me',id=markread['id'], body={'removeLabelIds' : ['UNREAD']}).execute()
+                service.users().messages().modify(userId=user_id,id=markread['id'], body={'removeLabelIds' : ['UNREAD']}).execute()
         print ("{:d} emails have been marked as read".format(len(Unread)))
     except:
         print("No SPAM messages found")
-mark_as_read()
+
+mark_as_read(service,'me')
+#Send an email message.
+def SendMessage(service, user_id, message):
+  try:
+    message = (service.users().messages().send(userId=user_id, body=message)
+               .execute())
+    print ('Message Id: %s' % message['id'])
+    return message
+  except errors.HttpError, error:
+    print ('An error occurred: %s' % error)
+
+#Create a message for an email.
+def CreateMessage(sender, to, subject, message_text):
+
+  message = MIMEText(message_text)
+  message['to'] = to
+  message['from'] = sender
+  message['subject'] = subject
+  return {'raw': base64.urlsafe_b64encode(message.as_string())}
+
+#Create a message for an email.
+def CreateMessageWithAttachment(sender, to, subject, message_text, file_dir, filename):
+
+  message = MIMEMultipart()
+  message['to'] = to
+  message['from'] = sender
+  message['subject'] = subject
+
+  msg = MIMEText(message_text)
+  message.attach(msg)
+
+  path = os.path.join(file_dir, filename)
+  content_type, encoding = mimetypes.guess_type(path)
+
+  if content_type is None or encoding is not None:
+    content_type = 'application/octet-stream'
+  main_type, sub_type = content_type.split('/', 1)
+  if main_type == 'text':
+    fp = open(path, 'rb')
+    msg = MIMEText(fp.read(), _subtype=sub_type)
+    fp.close()
+  elif main_type == 'image':
+    fp = open(path, 'rb')
+    msg = MIMEImage(fp.read(), _subtype=sub_type)
+    fp.close()
+  elif main_type == 'audio':
+    fp = open(path, 'rb')
+    msg = MIMEAudio(fp.read(), _subtype=sub_type)
+    fp.close()
+  else:
+    fp = open(path, 'rb')
+    msg = MIMEBase(main_type, sub_type)
+    msg.set_payload(fp.read())
+    fp.close()
+
+  msg.add_header('Content-Disposition', 'attachment', filename=filename)
+  message.attach(msg)
+
+  return {'raw': base64.urlsafe_b64encode(message.as_string())}
+
+#SendMessage(service,'me',CreateMessage('bill.gates@gmail.com','joerod@gmail.com','You are the man','test'))
