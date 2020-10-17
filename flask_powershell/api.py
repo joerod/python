@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,request
 import subprocess
 
 app = Flask(__name__)
@@ -6,7 +6,15 @@ app = Flask(__name__)
 @app.route("/", methods=['GET'])
 def index():
     return execute_script("test")
+    return name
 
+#url: http://127.0.0.1:5000/users?username=joerod
+@app.route("/users", methods=['GET'])
+def name():
+    username = request.args.get('username')
+    return username 
+
+#url: http://127.0.0.1:5000/
 def execute_script(script):
     cmd = ["powershell","-ExecutionPolicy", "Bypass", ".\{0}.ps1".format(script)]
     print(cmd)
