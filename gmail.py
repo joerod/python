@@ -6,16 +6,15 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import sys
 
-
-
 def main():
-    # If modifying these scopes, delete the file token.pickle.
+      """
+      Will use a gmail search query to find emails based on some criteria
+      and delete them in batches of 1000 which is a gmail limitation
+    """
     SCOPES = ['https://mail.google.com/']
     cred_dir = '/home/joerod/Downloads'
     q = "older_than:1y category:forums -is:starred"
-    """Shows basic usage of the Gmail API.
-    Lists the user's Gmail labels.
-    """
+  
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
