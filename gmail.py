@@ -5,21 +5,19 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import sys
+import argparse
 
-def main():
-      """
+def main(scopes,cred_dir,q):
+    """
       Will use a gmail search query to find emails based on some criteria
       and delete them in batches of 1000 which is a gmail limitation
+      Usage: python3 gmail.py --cred_dir '/home/joerod/Downloads' --q 'older_than:1y category:forums -is:starred' --scopes ['https://mail.google.com/']
     """
-    SCOPES = ['https://mail.google.com/']
-    cred_dir = '/home/joerod/Downloads'
-    q = "older_than:1y category:forums -is:starred"
-  
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists(os.path.exists(os.path.join(cred_dir, 'token.pickle'))):
+    if os.path.exists(os.path.join(cred_dir, 'token.pickle')):
         with open(os.path.join(cred_dir, 'token.pickle'), 'rb') as token:
             creds = pickle.load(token)
     # If there are no (valid) credentials available, let the user log in.
@@ -28,7 +26,7 @@ def main():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                os.path.join(cred_dir, 'credentials.json'), SCOPES)
+                os.path.join(cred_dir, 'credentials.json'), scopes)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open(os.path.join(cred_dir, 'token.pickle'), 'wb') as token:
@@ -88,4 +86,12 @@ def batch_delete_messages(service, messages):
         print('An error occurred while batchDeleting: {0}'.format(error))
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Gmail deleter')
+    parser.add_argument('--scopes', metavar='path', required=True,
+                        help='gmail scope')
+    parser.add_argument('--cred_dir', metavar='path', required=True,
+                        help='directory of credentials')
+    parser.add_argument('--q', metavar='path', required=True,
+                        help='gmail query to find emails')
+    args = parser.parse_args()
+    main(scopes=args.scopes, cred_dir=args.cred_dir, q=args.q)
