@@ -36,11 +36,12 @@ def main(scopes,cred_dir,q):
     for i in range(100):
         raw_messages = get_raw_messages(q,service)
         if raw_messages:
-            print("got messages!")
+            print("I've got mail!")
             messages_list = prep_messages_for_delete(raw_messages)
             batch_delete_messages(service, messages_list)
+            i += 1
         else:
-            sys.exit('No message found matching "{0}"'.format(q))
+            sys.exit('No message found matching "{}"'.format(q))
 
     # Call the Gmail API
 def get_raw_messages(query,service,userId='me'):
@@ -67,7 +68,7 @@ def prep_messages_for_delete(raw_messages):
 
     message['ids'].extend([str(d['id']) for d in raw_messages])
 
-    print("got {0} ids".format(len(message['ids'])))
+    print("Returned {} ids".format(len(message['ids'])))
     return message
 
 
@@ -83,15 +84,18 @@ def batch_delete_messages(service, messages):
 
         print("I deleted stuff!")
     except errors.HttpError as error:
-        print('An error occurred while batchDeleting: {0}'.format(error))
+        print('An error occurred while batchDeleting: {}'.format(error))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Gmail deleter')
-    parser.add_argument('--scopes', metavar='path', required=True,
-                        help='gmail scope')
+    parser.add_argument('--scopes', metavar="['https://mail.google.com/']", required=True,
+                        help='gmail scope',
+                        const="https://mail.google.com/",
+                        nargs='?',
+                        type=str)
     parser.add_argument('--cred_dir', metavar='path', required=True,
                         help='directory of credentials')
-    parser.add_argument('--q', metavar='path', required=True,
+    parser.add_argument('--q', metavar='older_than:1y category:forums -is:starred', required=True,
                         help='gmail query to find emails')
     args = parser.parse_args()
     main(scopes=args.scopes, cred_dir=args.cred_dir, q=args.q)
