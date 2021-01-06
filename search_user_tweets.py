@@ -10,6 +10,7 @@ Parameters:
 api – Authentication to the twitter API
 id – twitter handle to search
 search_term – String to search for in tweet
+only_urls – Only returns URLs in a tweet if a tweet has a URL
 Return type:	
 string of tweets
 """
