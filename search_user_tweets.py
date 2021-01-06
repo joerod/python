@@ -30,12 +30,12 @@ def user_status_count(api,id):
 def search_tweets(api,id,items,search_term,only_urls=False):
     for tweet in tweepy.Cursor(api.user_timeline, id=id).items(items):
         if search_term in tweet.text:
-            if 'True' in only_urls:
+            if(only_urls == 'True'):
                 urls = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', tweet.text)
                 if(len(urls) > 0):
                    print(urls[0])
             else:
-                  print(tweet.text)  
+                  print(tweet.text)   
 
 id = "joerodr"
 search_tweets(api,id,user_status_count(api,id),"Awesome")    
