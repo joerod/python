@@ -14,7 +14,7 @@ Return type:
 string of tweets
 """
 
-import tweepy
+import tweepy,re
 
 auth = tweepy.OAuthHandler('', '')
 auth.set_access_token('', '')
@@ -35,7 +35,6 @@ def search_tweets(api,id,items,search_term,only_urls=False):
                    print(urls[0])
             else:
                   print(tweet.text)  
-
 
 id = "joerodr"
 search_tweets(api,id,user_status_count(api,id),"Awesome")    
