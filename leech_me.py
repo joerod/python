@@ -2,10 +2,11 @@ import qbittorrentapi
 import time
 import argparse
 from plexapi.server import PlexServer
+from playsound import playsound
 
 parser = argparse.ArgumentParser(
     description='when your torrent is complete its removed from the queue and refresh your Plex library',
-    epilog="python leech_me.py --torrent_host '192.168.1.221' --password 'Password' --plex_host '192.168.1.221' --plex_token 'ad8voSaz1f52TjoV4RgK'"
+    epilog="python leech_me.py --torrent_host '192.168.1.221' --password 'Password' --plex_host '192.168.1.221' --plex_token 'ad8voSaz1f52TjoV4RgK' --download_complete_sound '/home/joerod/Dropbox/Public/files-done.mp3'"
 )
 parser.add_argument("--torrent_host", required=True, help="IP of machine running qbittorrent")
 parser.add_argument("--torrent_port", default='8080', help="Port of machine running qbittorrent")
@@ -14,6 +15,7 @@ parser.add_argument("--password", required=True, help="password to login")
 parser.add_argument("--plex_host", help="IP of machine running Plex")
 parser.add_argument("--plex_port", default='32400', help="IP of machine running Plex")
 parser.add_argument("--plex_token", help="token to auth to Plex")
+parser.add_argument("--download_complete_sound" ,help="Path to sound (wav/mp3) to play when downlaod is complete")
 args = parser.parse_args()
 
 # instantiate a qbittorrent client using the appropriate WebUI configuration
@@ -38,11 +40,18 @@ while(len(qbt_client.torrents_info())>0):
         if(torrents.state in ['uploading','stalledUP']):
             print(f'Removing {torrents.name}')
             qbt_client.torrents_delete(torrent_hashes=torrents.hash)
+            if(args.download_complete_sound):
+                 playsound(args.download_complete_sound)
             if(args.plex_host):
                 # remove unneeded path info from download
                 refresh_path = torrents.save_path.replace('/downloads/','').replace('/','')
-                plex.library.section(refresh_path).update()
-                print(f'Refreshed Plex path "{refresh_path}"')
+                if refresh_path == 'TV':
+                   refresh_path = 'TV Shows'
+                try:
+                    plex.library.section(refresh_path).update()
+                    print(f'Refreshed Plex path "{refresh_path}"')
+                except Exception as e:
+                    print(e)
                 if(len(qbt_client.torrents_info())==0):
                     end = time.time()
                     total_time = round((end-start)/60, 0)
