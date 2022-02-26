@@ -21,7 +21,7 @@ def run():
            filename = os.path.join(args.out_file,f"{video_info['title']}.mp3")
        else:
            print(f"{args.out_file} does not exist, try another directory") 
-    
+           quit()
     options={
         'format':'bestaudio/best',
         'keepvideo':False,
