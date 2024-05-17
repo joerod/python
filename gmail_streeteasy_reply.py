@@ -1,4 +1,3 @@
-# thsi script checks gmail for emails from streeteasy gets the person who is interested email and sends a template email then marks the email as read
 import os.path
 import re
 import base64
@@ -7,11 +6,12 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 from email import message_from_bytes
 
 # If modifying these SCOPES, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.send','https://www.googleapis.com/auth/gmail.modify']
-
 
 def authenticate_gmail():
     """Authenticates with Gmail API and returns the service object."""
@@ -55,7 +55,7 @@ def search_emails_with_subject(service, subjects):
 
         if unique_emails:
             print("Unique email addresses found:", unique_emails)
-            for email in unique_emails:
+            for email in 'unique_emails':
                 send_email(service, email)
         else:
             print("No unique email addresses found.")
@@ -78,11 +78,20 @@ def extract_and_store_unique_emails(text, email_set):
     for email in email_addresses:
         email_set.add(email)
 
-def create_message(to, subject, message_text):
-    """Create a message for an email."""
-    message = MIMEText(message_text)
+def create_message_with_attachment(to, subject, message_text, ics_content):
+    """Create a message for an email with an .ics attachment."""
+    message = MIMEMultipart()
     message['to'] = to
     message['subject'] = subject
+
+    # Add body to email
+    message.attach(MIMEText(message_text, 'plain'))
+
+    # Create the .ics file and attach it
+    ics = MIMEApplication(ics_content, 'octet-stream')
+    ics.add_header('Content-Disposition', 'attachment; filename="invite.ics"')
+    message.attach(ics)
+
     raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
     return {'raw': raw}
 
@@ -99,7 +108,22 @@ Thanks,
 Joe Rodriguez
 (212) 877-0591"""
 
-    message = create_message(to_email, subject, body)
+    # Create .ics file content
+    ics_content = """BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Your Organization//NONSGML v1.0//EN
+BEGIN:VEVENT
+UID:uid1@example.com
+DTSTAMP:20240519T160000Z
+DTSTART:20240519T160000Z
+DTEND:20240519T173000Z
+SUMMARY:Open House
+DESCRIPTION:Open house for 2128 35th Street 4e, Astoria, NY 11105.
+LOCATION:2128 35th Street, Astoria, NY 11105
+END:VEVENT
+END:VCALENDAR"""
+
+    message = create_message_with_attachment(to_email, subject, body, ics_content)
     sent_message = service.users().messages().send(userId="me", body=message).execute()
     print(f'Email sent to {to_email}')
 
