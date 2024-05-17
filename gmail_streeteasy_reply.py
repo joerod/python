@@ -1,3 +1,6 @@
+# thsi script checks gmail for emails from streeteasy gets the person who is interested email and sends a template email with an ics attachment
+# then marks the email as read
+
 import os.path
 import re
 import base64
@@ -103,6 +106,7 @@ def send_email(service, to_email):
 Thanks for your interest in my apartment, my name is Joe and I am the owner of this unit.
 
 I am having an open house this Sunday 5/19/24 between 12PM and 1:30PM. Feel free to come by then to view the apartment and fill out an application if you’re interested.
+Attached you'll see an invitation to the open house which you can add to your calendar.
 
 Thanks,
 Joe Rodriguez
